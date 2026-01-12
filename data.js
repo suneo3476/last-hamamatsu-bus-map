@@ -26,19 +26,21 @@ const BUS_DATA = {
     {
       id: 'dev-east-1',
       name: 'E1 東海道ライン',
+      origin: '浜松駅',
       destination: '天竜川駅',
       color: '#e63946',
       stops: [
-        { name: '浜松駅', lastBus: '23:15', major: true },
-        { name: '助信', lastBus: '23:22', major: false },
-        { name: '曳馬', lastBus: '23:28', major: true },
-        { name: '上島', lastBus: '23:35', major: false },
-        { name: '天竜川駅', lastBus: '23:45', major: true }
+        { name: '浜松駅', lastBus: '21:05', major: true },
+        { name: '助信', lastBus: '21:12', major: false },
+        { name: '曳馬', lastBus: '21:18', major: true },
+        { name: '上島', lastBus: '21:25', major: false },
+        { name: '天竜川駅', lastBus: '21:35', major: true }
       ]
     },
     {
       id: 'dev-east-2',
       name: 'E2 積志エクスプレス',
+      origin: '浜松駅',
       destination: '積志車庫',
       color: '#f4a261',
       stops: [
@@ -53,6 +55,7 @@ const BUS_DATA = {
     {
       id: 'dev-north-1',
       name: 'N1 北星ルート',
+      origin: '浜松駅',
       destination: '浜北駅',
       color: '#2a9d8f',
       stops: [
@@ -65,13 +68,14 @@ const BUS_DATA = {
     {
       id: 'dev-north-2',
       name: 'N2 三方原線',
+      origin: '浜松駅',
       destination: '三方原墓園',
       color: '#264653',
       stops: [
-        { name: '浜松駅', lastBus: '21:45', major: true },
-        { name: '広沢', lastBus: '21:55', major: true },
-        { name: '三方原', lastBus: '22:10', major: true },
-        { name: '三方原墓園', lastBus: '22:20', major: true }
+        { name: '浜松駅', lastBus: '21:15', major: true },
+        { name: '広沢', lastBus: '21:25', major: true },
+        { name: '三方原', lastBus: '21:40', major: true },
+        { name: '三方原墓園', lastBus: '21:50', major: true }
       ]
     },
 
@@ -79,6 +83,7 @@ const BUS_DATA = {
     {
       id: 'dev-west-1',
       name: 'W1 湖岸パノラマ',
+      origin: '浜松駅',
       destination: '舘山寺温泉',
       color: '#457b9d',
       stops: [
@@ -91,17 +96,19 @@ const BUS_DATA = {
     {
       id: 'dev-west-2',
       name: 'W2 志都呂モール',
-      destination: 'ショッピングモール志都呂',
+      origin: '浜松駅',
+      destination: 'イオン志都呂',
       color: '#1d3557',
       stops: [
         { name: '浜松駅', lastBus: '22:00', major: true },
         { name: '高塚駅', lastBus: '22:15', major: true },
-        { name: 'ショッピングモール志都呂', lastBus: '22:35', major: true }
+        { name: 'イオン志都呂', lastBus: '22:35', major: true }
       ]
     },
     {
       id: 'dev-west-3',
       name: 'W3 雄踏ナイト',
+      origin: '浜松駅',
       destination: '雄踏総合公園',
       color: '#a8dadc',
       stops: [
@@ -116,18 +123,20 @@ const BUS_DATA = {
     {
       id: 'dev-south-1',
       name: 'S1 海岸通り',
+      origin: '浜松駅',
       destination: '中田島砂丘',
       color: '#e9c46a',
       stops: [
-        { name: '浜松駅', lastBus: '21:20', major: true },
-        { name: '南区役所', lastBus: '21:32', major: true },
-        { name: '可美', lastBus: '21:45', major: false },
-        { name: '中田島砂丘', lastBus: '22:00', major: true }
+        { name: '浜松駅', lastBus: '21:00', major: true },
+        { name: '南区役所', lastBus: '21:12', major: true },
+        { name: '可美', lastBus: '21:25', major: false },
+        { name: '中田島砂丘', lastBus: '21:40', major: true }
       ]
     },
     {
       id: 'dev-south-2',
       name: 'S2 米津シャトル',
+      origin: '浜松駅',
       destination: '米津浜',
       color: '#f4a261',
       stops: [
@@ -142,12 +151,13 @@ const BUS_DATA = {
     {
       id: 'dev-northeast-1',
       name: 'NE1 医大病院線',
+      origin: '浜松駅',
       destination: '医科大学',
       color: '#9b2226',
       stops: [
-        { name: '浜松駅', lastBus: '22:30', major: true },
-        { name: '半田山', lastBus: '22:45', major: true },
-        { name: '医科大学', lastBus: '23:00', major: true }
+        { name: '浜松駅', lastBus: '21:45', major: true },
+        { name: '半田山', lastBus: '22:00', major: true },
+        { name: '医科大学', lastBus: '22:15', major: true }
       ]
     },
 
@@ -155,6 +165,7 @@ const BUS_DATA = {
     {
       id: 'dev-northwest-1',
       name: 'NW1 佐鳴台循環',
+      origin: '浜松駅',
       destination: '佐鳴台団地',
       color: '#bb3e03',
       stops: [
@@ -169,6 +180,7 @@ const BUS_DATA = {
     {
       id: 'dev-midnight-1',
       name: 'M1 ミッドナイト便',
+      origin: '浜松駅',
       destination: '遠鉄自動車学校',
       color: '#6a0dad',
       stops: [

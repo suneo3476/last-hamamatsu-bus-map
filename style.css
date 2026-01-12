@@ -14,7 +14,7 @@
   --text-secondary: #888888;
   --accent-pink: #ff0055;
   --accent-pink-dim: rgba(255, 0, 85, 0.3);
-  --font-main: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main: 'Atkinson Hyperlegible Mono', 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
 }
 
 html, body {
@@ -173,24 +173,15 @@ body {
 }
 
 .route-line {
-  stroke-width: 3;
   fill: none;
   stroke-linecap: round;
   cursor: pointer;
-  transition: opacity 0.3s ease, stroke-width 0.2s ease;
-}
-
-.route-line:hover {
-  stroke-width: 5;
+  transition: opacity 0.3s ease;
 }
 
 .route-line.expired {
   opacity: 0.08;
   pointer-events: none;
-}
-
-.route-line.highlighted {
-  stroke-width: 5;
 }
 
 .stop-circle {
@@ -211,7 +202,6 @@ body {
 
 .stop-label {
   fill: var(--text-primary);
-  font-size: 11px;
   font-weight: 700;
   pointer-events: none;
   text-shadow:

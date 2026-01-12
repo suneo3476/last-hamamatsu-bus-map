@@ -45,7 +45,13 @@
   const TIME_END = 1470;   // 24:30
   const MIN_ZOOM = 400;
   const MAX_ZOOM = 2000;
-  const ZOOM_SENSITIVITY = 0.3; // ズーム感度（小さいほど鈍感）
+  const ZOOM_SENSITIVITY = 0.15; // ズーム感度（小さいほど鈍感）
+
+  // フォントサイズと線の太さのグラデーション設定
+  const FONT_SIZE_MIN = 8;   // 中心側の最小フォントサイズ
+  const FONT_SIZE_MAX = 12;  // 外側の最大フォントサイズ
+  const LINE_WIDTH_MIN = 1.5;  // 中心側の最小線幅
+  const LINE_WIDTH_MAX = 3;  // 外側の最大線幅
 
   /**
    * 分を時刻文字列に変換
@@ -73,13 +79,36 @@
   }
 
   /**
-   * 角度から縦書きか横書きかを判定
-   * @param {number} angleDeg - 0度が上（y負方向）、時計回りの角度（0-360）
-   * @returns {boolean} 縦書きならtrue
+   * 半径からフォントサイズを計算（中心ほど小さく、外側ほど大きく）
    */
-  function isVerticalText(angleDeg) {
-    // 315~360, 0~45, 135~225 は縦書き
-    return (angleDeg >= 315 || angleDeg <= 45) || (angleDeg >= 135 && angleDeg <= 225);
+  function radiusToFontSize(radius) {
+    const normalized = (radius - CENTER_RADIUS) / (MAX_RADIUS - CENTER_RADIUS);
+    return FONT_SIZE_MIN + (FONT_SIZE_MAX - FONT_SIZE_MIN) * normalized;
+  }
+
+  /**
+   * 半径から線の太さを計算（中心ほど細く、外側ほど太く）
+   */
+  function radiusToLineWidth(radius) {
+    const normalized = (radius - CENTER_RADIUS) / (MAX_RADIUS - CENTER_RADIUS);
+    return LINE_WIDTH_MIN + (LINE_WIDTH_MAX - LINE_WIDTH_MIN) * normalized;
+  }
+
+  /**
+   * 角度からテキスト回転角度を計算
+   * 線の方向に沿うように回転させる
+   * @param {number} angleDeg - 0度が上（y負方向）、時計回りの角度（0-360）
+   * @returns {number} テキストの回転角度（度）
+   */
+  function getTextRotation(angleDeg) {
+    // 線の角度から-90度（上向きの線なら横向きテキスト）を基準に
+    // テキストが読みやすい方向になるよう調整
+    let rotation = angleDeg - 90;
+    // 上下逆さまにならないよう調整（90〜270度の範囲なら180度回転）
+    if (angleDeg > 90 && angleDeg < 270) {
+      rotation = angleDeg + 90;
+    }
+    return rotation;
   }
 
   /**
@@ -101,7 +130,7 @@
       circle.setAttribute('class', 'time-circle');
       timeCirclesGroup.appendChild(circle);
 
-      // ラベル（右下に配置）
+      // ラベル（右下に配置、中心に対して垂直=放射状に回転）
       const angle = Math.PI / 4; // 45度
       const labelX = Math.cos(angle) * (radius + 5);
       const labelY = Math.sin(angle) * (radius + 5);
@@ -110,8 +139,11 @@
       label.setAttribute('x', labelX);
       label.setAttribute('y', labelY);
       label.setAttribute('class', 'time-circle-label');
-      label.setAttribute('text-anchor', 'start');
-      label.setAttribute('dominant-baseline', 'middle');
+      // 中心から放射状に回転（45度の位置なので45度回転）
+      const rotationDeg = 45;
+      label.setAttribute('transform', `rotate(${rotationDeg}, ${labelX}, ${labelY})`);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('dominant-baseline', 'text-before-edge');
       label.textContent = minutesToTime(time);
       timeCirclesGroup.appendChild(label);
     });
@@ -163,6 +195,9 @@
       const startRadius = timeToRadius(departMinutes);
       const endRadius = timeToRadius(arriveMinutes);
 
+      // 線の太さ（始点と終点の平均、または終点側を使用）
+      const lineWidth = radiusToLineWidth((startRadius + endRadius) / 2);
+
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', Math.cos(angle) * startRadius);
       line.setAttribute('y1', Math.sin(angle) * startRadius);
@@ -171,6 +206,7 @@
       line.setAttribute('class', `route-line ${isExpired ? 'expired' : ''}`);
       line.setAttribute('data-route-id', route.id);
       line.style.stroke = routeColor;
+      line.style.strokeWidth = lineWidth + 'px';
 
       // ホバーイベント
       line.addEventListener('mouseenter', (e) => showPopup(e, route, departMinutes, arriveMinutes));
@@ -178,6 +214,38 @@
       line.addEventListener('mouseleave', hidePopup);
 
       routesGroup.appendChild(line);
+
+      // 始発駅名ラベル（線の始点側）
+      const startStop = stops[0];
+      const startX = Math.cos(angle) * startRadius;
+      const startY = Math.sin(angle) * startRadius;
+
+      const startLabelOffset = -12;
+      const startLabelX = startX + Math.cos(angle) * startLabelOffset;
+      const startLabelY = startY + Math.sin(angle) * startLabelOffset;
+
+      // 始発駅名のフォントサイズ（始点位置に基づく）
+      const startFontSize = radiusToFontSize(startRadius);
+
+      const startLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      startLabel.setAttribute('x', startLabelX);
+      startLabel.setAttribute('y', startLabelY);
+      startLabel.setAttribute('class', `stop-label start-label ${isExpired ? 'expired' : ''}`);
+      startLabel.style.fontSize = startFontSize + 'px';
+
+      // テキストを線の方向に合わせて回転
+      const startTextRotation = getTextRotation(angleDeg);
+      startLabel.setAttribute('transform', `rotate(${startTextRotation}, ${startLabelX}, ${startLabelY})`);
+
+      // text-anchorは始発側なので終点と逆
+      if (angleDeg > 90 && angleDeg < 270) {
+        startLabel.setAttribute('text-anchor', 'start');
+      } else {
+        startLabel.setAttribute('text-anchor', 'end');
+      }
+      startLabel.setAttribute('dominant-baseline', 'middle');
+      startLabel.textContent = startStop.name;
+      stopsGroup.appendChild(startLabel);
 
       // 終着駅のバス停を描画
       const endStop = stops[stops.length - 1];
@@ -203,33 +271,26 @@
       const labelX = endX + Math.cos(angle) * labelOffset;
       const labelY = endY + Math.sin(angle) * labelOffset;
 
+      // 終着駅名のフォントサイズ（終点位置に基づく）
+      const endFontSize = radiusToFontSize(endRadius);
+
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       label.setAttribute('x', labelX);
       label.setAttribute('y', labelY);
       label.setAttribute('class', `stop-label ${isExpired ? 'expired' : ''}`);
+      label.style.fontSize = endFontSize + 'px';
 
-      // 縦書き/横書きの判定と設定
-      if (isVerticalText(angleDeg)) {
-        // 縦書き
-        label.setAttribute('writing-mode', 'vertical-rl');
-        label.setAttribute('text-anchor', 'start');
-        label.setAttribute('dominant-baseline', 'middle');
-        // 上向き（315-45度）は下から上、下向き（135-225度）は上から下
-        if (angleDeg >= 135 && angleDeg <= 225) {
-          label.setAttribute('text-anchor', 'start');
-        } else {
-          label.setAttribute('text-anchor', 'end');
-        }
+      // テキストを線の方向に合わせて回転
+      const textRotation = getTextRotation(angleDeg);
+      label.setAttribute('transform', `rotate(${textRotation}, ${labelX}, ${labelY})`);
+
+      // text-anchorは回転後の配置を考慮（外側に向かって読む方向）
+      if (angleDeg > 90 && angleDeg < 270) {
+        label.setAttribute('text-anchor', 'end');
       } else {
-        // 横書き
-        label.setAttribute('dominant-baseline', 'middle');
-        // 右側（45-135度）は左寄せ、左側（225-315度）は右寄せ
-        if (angleDeg > 45 && angleDeg < 135) {
-          label.setAttribute('text-anchor', 'start');
-        } else {
-          label.setAttribute('text-anchor', 'end');
-        }
+        label.setAttribute('text-anchor', 'start');
       }
+      label.setAttribute('dominant-baseline', 'middle');
 
       label.textContent = endStop.name;
       stopsGroup.appendChild(label);
