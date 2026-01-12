@@ -272,9 +272,22 @@
   }
 
   /**
+   * 開発版バナーを表示
+   */
+  function showDevBanner() {
+    if (typeof BUS_DATA !== 'undefined' && BUS_DATA.meta && BUS_DATA.meta.isDev) {
+      const banner = document.getElementById('dev-banner');
+      if (banner) {
+        banner.classList.remove('hidden');
+      }
+    }
+  }
+
+  /**
    * 初期化
    */
   function init() {
+    showDevBanner();
     drawTimeCircles();
     drawRoutes();
     setupEventListeners();

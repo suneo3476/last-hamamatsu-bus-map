@@ -302,6 +302,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* 開発版バナー */
+.dev-banner {
+  padding: 0.5rem;
+  text-align: center;
+  background: linear-gradient(90deg, #ff6b35, #ff0055);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
 /* ユーティリティ */
 .hidden {
   display: none !important;

@@ -10,7 +10,9 @@
       "Bash(git checkout:*)",
       "Bash(git push:*)",
       "Bash(curl:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "WebFetch(domain:last-hamamatsu-bus-map.suneo3476.workers.dev)",
+      "Bash(git stash:*)"
     ]
   }
 }

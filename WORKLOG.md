@@ -56,3 +56,23 @@
 
 **次のアクション:**
 - 遠鉄バスの実データを収集
+
+---
+
+### 14:00頃 - Cloudflare Pagesデプロイ完了
+
+**作業内容:**
+- wrangler.toml を追加（静的サイト設定）
+- develop → main にマージ
+- Cloudflare Workers経由でデプロイ
+
+**本番URL:**
+https://last-hamamatsu-bus-map.suneo3476.workers.dev
+
+**意思決定:**
+- Cloudflare Pages (Workers) を採用: 無料、GitHubと連携、自動デプロイ
+- mainブランチをデプロイ対象に設定
+
+**次のアクション:**
+- 遠鉄バスの実データを収集して data.js を更新
+- カラーリング調整
