@@ -207,8 +207,22 @@ body {
   opacity: 0.08;
 }
 
-.platform-label {
-  fill: #888888;
+.platform-icon-bg {
+  transition: opacity 0.3s ease;
+}
+
+.platform-icon-bg.expired {
+  opacity: 0.08;
+}
+
+.platform-icon-text {
+  font-weight: 700;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.platform-icon-text.expired {
+  opacity: 0.08;
 }
 
 .route-icon-bg {
