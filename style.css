@@ -8,7 +8,8 @@
 :root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #1a1a1a;
-  --bg-glass: rgba(20, 20, 20, 0.9);
+  --bg-glass: rgba(20, 20, 20, 0.6);
+  --bg-panel: rgba(10, 10, 10, 0.5);
   --text-primary: #ffffff;
   --text-secondary: #888888;
   --accent-pink: #ff0055;
@@ -61,6 +62,11 @@ body {
   text-align: center;
   z-index: 100;
   pointer-events: none;
+  background: var(--bg-panel);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .title {
@@ -283,6 +289,11 @@ body {
   gap: 1rem;
   z-index: 100;
   width: min(90%, 500px);
+  background: var(--bg-panel);
+  backdrop-filter: blur(8px);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .time-control {

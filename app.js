@@ -45,6 +45,7 @@
   const TIME_END = 1470;   // 24:30
   const MIN_ZOOM = 400;
   const MAX_ZOOM = 2000;
+  const ZOOM_SENSITIVITY = 0.3; // ズーム感度（小さいほど鈍感）
 
   /**
    * 分を時刻文字列に変換
@@ -69,6 +70,16 @@
   function timeToRadius(minutes) {
     const normalized = Math.max(0, Math.min(1, (minutes - TIME_START) / (TIME_END - TIME_START)));
     return CENTER_RADIUS + (MAX_RADIUS - CENTER_RADIUS) * normalized;
+  }
+
+  /**
+   * 角度から縦書きか横書きかを判定
+   * @param {number} angleDeg - 0度が上（y負方向）、時計回りの角度（0-360）
+   * @returns {boolean} 縦書きならtrue
+   */
+  function isVerticalText(angleDeg) {
+    // 315~360, 0~45, 135~225 は縦書き
+    return (angleDeg >= 315 || angleDeg <= 45) || (angleDeg >= 135 && angleDeg <= 225);
   }
 
   /**
@@ -131,6 +142,9 @@
 
     routes.forEach((route, routeIndex) => {
       const angle = angleStep * routeIndex - Math.PI / 2; // 上から開始
+      // 角度を0-360度に変換（0度が上、時計回り）
+      let angleDeg = ((angle + Math.PI / 2) * 180 / Math.PI) % 360;
+      if (angleDeg < 0) angleDeg += 360;
 
       const routeColor = route.color || '#00a651';
       const stops = route.stops || [];
@@ -145,8 +159,8 @@
       // 終了判定（始発時刻が現在時刻を過ぎていたら終了）
       const isExpired = departMinutes < currentMinutes;
 
-      // 路線の線を描画
-      const startRadius = CENTER_RADIUS;
+      // 路線の線を描画（始発時刻の位置から開始）
+      const startRadius = timeToRadius(departMinutes);
       const endRadius = timeToRadius(arriveMinutes);
 
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -194,16 +208,30 @@
       label.setAttribute('y', labelY);
       label.setAttribute('class', `stop-label ${isExpired ? 'expired' : ''}`);
 
-      // テキストの向きを調整
-      const angleDeg = (angle * 180 / Math.PI + 90) % 360;
-      if (angleDeg > 90 && angleDeg < 270) {
-        label.setAttribute('text-anchor', 'end');
-      } else {
+      // 縦書き/横書きの判定と設定
+      if (isVerticalText(angleDeg)) {
+        // 縦書き
+        label.setAttribute('writing-mode', 'vertical-rl');
         label.setAttribute('text-anchor', 'start');
+        label.setAttribute('dominant-baseline', 'middle');
+        // 上向き（315-45度）は下から上、下向き（135-225度）は上から下
+        if (angleDeg >= 135 && angleDeg <= 225) {
+          label.setAttribute('text-anchor', 'start');
+        } else {
+          label.setAttribute('text-anchor', 'end');
+        }
+      } else {
+        // 横書き
+        label.setAttribute('dominant-baseline', 'middle');
+        // 右側（45-135度）は左寄せ、左側（225-315度）は右寄せ
+        if (angleDeg > 45 && angleDeg < 135) {
+          label.setAttribute('text-anchor', 'start');
+        } else {
+          label.setAttribute('text-anchor', 'end');
+        }
       }
-      label.setAttribute('dominant-baseline', 'middle');
-      label.textContent = endStop.name;
 
+      label.textContent = endStop.name;
       stopsGroup.appendChild(label);
 
       // 路線アイコン（路線の中間あたりに表示）
@@ -319,7 +347,9 @@
    * ズーム
    */
   function zoom(delta, centerX, centerY) {
-    const factor = delta > 0 ? 0.9 : 1.1;
+    // 感度を下げる
+    const normalizedDelta = delta * ZOOM_SENSITIVITY;
+    const factor = normalizedDelta > 0 ? 0.95 : 1.05;
     const newW = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, viewBox.w * factor));
     const newH = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, viewBox.h * factor));
 
@@ -463,7 +493,7 @@
         );
         const delta = lastTouchDistance - distance;
         const svgCoord = screenToSVG(lastTouchCenter.x, lastTouchCenter.y);
-        zoom(delta, svgCoord.x, svgCoord.y);
+        zoom(delta * 0.5, svgCoord.x, svgCoord.y); // タッチズームも感度下げる
         lastTouchDistance = distance;
       }
     }, { passive: true });
