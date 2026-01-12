@@ -192,10 +192,36 @@
     stopsGroup.innerHTML = '';
 
     const routes = BUS_DATA.routes || [];
-    const angleStep = (2 * Math.PI) / routes.length;
 
-    routes.forEach((route, routeIndex) => {
-      const angle = angleStep * routeIndex - Math.PI / 2; // 上から開始
+    // 乗り場ごとに路線をグループ化
+    const platformGroups = {};
+    routes.forEach(route => {
+      const p = route.platform || 1;
+      if (!platformGroups[p]) platformGroups[p] = [];
+      platformGroups[p].push(route);
+    });
+
+    // 乗り場数（1-16）
+    const numPlatforms = 16;
+    const platformAngleStep = (2 * Math.PI) / numPlatforms;
+
+    routes.forEach((route) => {
+      const platform = route.platform || 1;
+      const platformRoutes = platformGroups[platform] || [];
+      const indexInPlatform = platformRoutes.indexOf(route);
+      const numRoutesInPlatform = platformRoutes.length;
+
+      // 乗り場の基本角度（乗り場1が下=180度から開始、時計回り）
+      // 乗り場1→180度、乗り場9→0度（上）、乗り場16→157.5度あたり
+      const platformBaseAngle = Math.PI + (platform - 1) * platformAngleStep;
+
+      // 同一乗り場内での微調整（乗り場内で均等に分散）
+      const offsetAngle = numRoutesInPlatform > 1
+        ? (indexInPlatform - (numRoutesInPlatform - 1) / 2) * (platformAngleStep * 0.6 / numRoutesInPlatform)
+        : 0;
+
+      const angle = platformBaseAngle + offsetAngle;
+
       // 角度を0-360度に変換（0度が上、時計回り）
       let angleDeg = ((angle + Math.PI / 2) * 180 / Math.PI) % 360;
       if (angleDeg < 0) angleDeg += 360;
