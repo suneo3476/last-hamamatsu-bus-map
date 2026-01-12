@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>浜松終バスマップ - 遠鉄バス終バス可視化</title>
+  <meta name="description" content="遠鉄バスの終バスを時間軸で可視化するインタラクティブマップ">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ヘッダー -->
+    <header class="header">
+      <h1 class="title">浜松終バスマップ</h1>
+      <p class="subtitle">遠鉄バス終バス可視化</p>
+    </header>
+
+    <!-- メインビジュアライゼーション -->
+    <main class="main">
+      <div class="map-container">
+        <svg id="map" viewBox="-400 -400 800 800">
+          <!-- 同心円（時間軸） -->
+          <g id="time-circles"></g>
+          <!-- 路線 -->
+          <g id="routes"></g>
+          <!-- バス停 -->
+          <g id="stops"></g>
+          <!-- 中心（浜松駅） -->
+          <circle cx="0" cy="0" r="20" class="center-station" />
+          <text x="0" y="5" class="center-label">浜松駅</text>
+        </svg>
+      </div>
+    </main>
+
+    <!-- コントロールパネル -->
+    <div class="controls">
+      <div class="time-display">
+        <span id="current-time">21:00</span>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="time-slider" min="1260" max="1470" value="1260" step="1">
+        <div class="time-labels">
+          <span>21:00</span>
+          <span>22:00</span>
+          <span>23:00</span>
+          <span>24:00</span>
+          <span>24:30</span>
+        </div>
+      </div>
+      <div class="playback-controls">
+        <button id="play-btn" class="btn">▶ 再生</button>
+        <button id="reset-btn" class="btn">↺ リセット</button>
+      </div>
+    </div>
+
+    <!-- 情報パネル -->
+    <div id="info-panel" class="info-panel hidden">
+      <button class="close-btn" id="close-panel">×</button>
+      <h2 id="panel-title">バス停名</h2>
+      <div id="panel-content">
+        <!-- 終バス情報が入る -->
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
