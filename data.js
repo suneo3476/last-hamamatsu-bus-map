@@ -1,20 +1,21 @@
 /**
  * 浜松終バスマップ - バスデータ
  *
- * ⚠️ 開発用サンプルデータ（時刻は仮）
- * 実際の遠鉄バス時刻表を確認してください
+ * 遠鉄バス公式時刻表(2025年8月28日改正)に基づく
  *
  * 乗り場配置: 画像のバスターミナル図に対応
  * 乗り場1が下、時計回りに1→16
+ * 乗り場11は欠番
  */
 
 const BUS_DATA = {
   // メタ情報
   meta: {
-    version: '0.3.0-dev',
-    isDev: true,
+    version: '1.0.0',
+    isDev: false,
     lastUpdated: '2026-01-12',
-    notice: '⚠️ 開発用サンプルデータです。時刻は実際と異なります。'
+    dataRevision: '2025-08-28',
+    notice: '遠鉄バス公式時刻表(2025年8月28日改正)に基づく'
   },
 
   // 中心駅
@@ -46,130 +47,57 @@ const BUS_DATA = {
   // 路線データ（乗り場順）
   // 乗り場11は欠番
   routes: [
-    // === 乗り場1: 舘山寺線/大塚ひとみヶ丘線/大久保線 ===
+    // === 乗り場1: 舘山寺線/大塚ひとみヶ丘線 ===
+    // 大久保線(37)は18:07終バスのため掲載対象外
     {
-      id: 'p1-30',
+      id: 'p1-30-31',
       platform: 1,
-      routeNum: '30',
+      routeNum: '30/31',
       name: '舘山寺線',
-      destination: '伊佐見橋・舘山寺温泉・村櫛',
+      destination: '村櫛',
       color: '#d4a373',
-      stops: [
-        { name: '浜松駅', lastBus: '21:10' },
-        { name: '舘山寺温泉', lastBus: '21:55' }
-      ]
-    },
-    {
-      id: 'p1-31',
-      platform: 1,
-      routeNum: '31',
-      name: '舘山寺線',
-      destination: '伊佐見橋・舘山寺温泉・村櫛',
-      color: '#d4a373',
-      stops: [
-        { name: '浜松駅', lastBus: '21:30' },
-        { name: '舘山寺温泉', lastBus: '22:15' }
-      ]
+      weekday: {
+        lastDeparture: '23:00',
+        lastArrival: '23:26'
+      },
+      holiday: {
+        lastDeparture: '23:00',
+        lastArrival: '23:29'
+      }
     },
     {
       id: 'p1-36',
       platform: 1,
       routeNum: '36',
       name: '大塚ひとみヶ丘線',
-      destination: 'ゆう・おおひとみ・ひとみヶ丘',
+      destination: '山崎',
       color: '#d4a373',
-      stops: [
-        { name: '浜松駅', lastBus: '21:45' },
-        { name: 'ひとみヶ丘', lastBus: '22:25' }
-      ]
-    },
-    {
-      id: 'p1-37',
-      platform: 1,
-      routeNum: '37',
-      name: '大久保線',
-      destination: '神ヶ谷・大久保',
-      color: '#d4a373',
-      stops: [
-        { name: '浜松駅', lastBus: '22:00' },
-        { name: '大久保', lastBus: '22:40' }
-      ]
+      weekday: {
+        lastDeparture: '21:26',
+        lastArrival: '22:10'
+      },
+      holiday: {
+        lastDeparture: '21:26',
+        lastArrival: '22:09'
+      }
     },
 
-    // === 乗り場2: 遠州浜蜆塚線/鶴見富塚じゅんかん/大平台線/伊佐見線 ===
-    {
-      id: 'p2-0',
-      platform: 2,
-      routeNum: '0',
-      name: '遠州浜蜆塚線',
-      destination: '蜆塚・佐鳴台',
-      color: '#20b2aa',
-      stops: [
-        { name: '浜松駅', lastBus: '21:20' },
-        { name: '佐鳴台', lastBus: '21:50' }
-      ]
-    },
-    {
-      id: 'p2-8',
-      platform: 2,
-      routeNum: '8',
-      name: '鶴見富塚じゅんかん',
-      destination: '医療センターまわり',
-      color: '#20b2aa',
-      stops: [
-        { name: '浜松駅', lastBus: '22:30' },
-        { name: '医療センター', lastBus: '23:00' }
-      ]
-    },
-    {
-      id: 'p2-8-22',
-      platform: 2,
-      routeNum: '8-22',
-      name: '大平台線',
-      destination: '広沢・医療センター経由・大平台',
-      color: '#20b2aa',
-      stops: [
-        { name: '浜松駅', lastBus: '21:50' },
-        { name: '大平台', lastBus: '22:30' }
-      ]
-    },
-    {
-      id: 'p2-8-33',
-      platform: 2,
-      routeNum: '8-33',
-      name: '伊佐見線',
-      destination: '広沢・医療センター・伊佐見',
-      color: '#20b2aa',
-      stops: [
-        { name: '浜松駅', lastBus: '21:35' },
-        { name: '伊佐見', lastBus: '22:15' }
-      ]
-    },
-
-    // === 乗り場3: 掛塚さなる台線/大平台線 ===
+    // === 乗り場3: 掛塚さなる台線 ===
     {
       id: 'p3-9',
       platform: 3,
       routeNum: '9',
       name: '掛塚さなる台線',
-      destination: '鴨江・医療センター',
+      destination: '掛塚',
       color: '#cd853f',
-      stops: [
-        { name: '浜松駅', lastBus: '22:20' },
-        { name: '医療センター', lastBus: '22:55' }
-      ]
-    },
-    {
-      id: 'p3-9-22',
-      platform: 3,
-      routeNum: '9-22',
-      name: '大平台線',
-      destination: '鴨江・大平台',
-      color: '#cd853f',
-      stops: [
-        { name: '浜松駅', lastBus: '21:40' },
-        { name: '大平台', lastBus: '22:20' }
-      ]
+      weekday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:08'
+      },
+      holiday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:08'
+      }
     },
 
     // === 乗り場4: 浜名線/小沢渡線 ===
@@ -178,24 +106,32 @@ const BUS_DATA = {
       platform: 4,
       routeNum: '12',
       name: '浜名線',
-      destination: '高塚・馬郡',
+      destination: '馬郡遺跡',
       color: '#32cd32',
-      stops: [
-        { name: '浜松駅', lastBus: '22:15' },
-        { name: '馬郡', lastBus: '22:55' }
-      ]
+      weekday: {
+        lastDeparture: '21:36',
+        lastArrival: '22:03'
+      },
+      holiday: {
+        lastDeparture: '21:36',
+        lastArrival: '22:03'
+      }
     },
     {
       id: 'p4-16-4',
       platform: 4,
       routeNum: '16-4',
       name: '小沢渡線',
-      destination: '春日町・法枝・小沢渡・浜松市総合水泳場',
+      destination: '柏原西',
       color: '#32cd32',
-      stops: [
-        { name: '浜松駅', lastBus: '21:30' },
-        { name: '総合水泳場', lastBus: '22:10' }
-      ]
+      weekday: {
+        lastDeparture: '20:37',
+        lastArrival: '21:04'
+      },
+      holiday: {
+        lastDeparture: '20:37',
+        lastArrival: '21:04'
+      }
     },
 
     // === 乗り場5: 志都呂宇布見線 ===
@@ -204,50 +140,50 @@ const BUS_DATA = {
       platform: 5,
       routeNum: '20',
       name: '志都呂宇布見線',
-      destination: '入野・山崎・舞阪駅',
+      destination: '舞阪駅',
       color: '#6b8e23',
-      stops: [
-        { name: '浜松駅', lastBus: '22:00' },
-        { name: '舞阪駅', lastBus: '22:50' }
-      ]
+      weekday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:16'
+      },
+      holiday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:16'
+      }
     },
 
-    // === 乗り場6: 中田島線/三島江之島線/大塚ひとみヶ丘線 ===
+    // === 乗り場6: 中田島線/三島江之島線 ===
     {
       id: 'p6-4',
       platform: 6,
       routeNum: '4',
       name: '中田島線',
-      destination: '中田島砂丘',
+      destination: '中田島車庫',
       color: '#ff69b4',
-      stops: [
-        { name: '浜松駅', lastBus: '21:15' },
-        { name: '中田島砂丘', lastBus: '21:45' }
-      ]
+      weekday: {
+        lastDeparture: '22:20',
+        lastArrival: '22:37'
+      },
+      holiday: {
+        lastDeparture: '22:20',
+        lastArrival: '22:37'
+      }
     },
     {
       id: 'p6-5',
       platform: 6,
       routeNum: '5',
       name: '三島江之島線',
-      destination: '南行政センター・江之島・遠州浜',
+      destination: '遠州浜四丁目',
       color: '#ff69b4',
-      stops: [
-        { name: '浜松駅', lastBus: '21:40' },
-        { name: '遠州浜', lastBus: '22:20' }
-      ]
-    },
-    {
-      id: 'p6-6',
-      platform: 6,
-      routeNum: '6',
-      name: '大塚ひとみヶ丘線',
-      destination: '北寺島・大塚',
-      color: '#ff69b4',
-      stops: [
-        { name: '浜松駅', lastBus: '22:05' },
-        { name: '大塚', lastBus: '22:40' }
-      ]
+      weekday: {
+        lastDeparture: '20:15',
+        lastArrival: '20:43'
+      },
+      holiday: {
+        lastDeparture: '20:15',
+        lastArrival: '20:43'
+      }
     },
 
     // === 乗り場7: 遠州浜蜆塚線 ===
@@ -256,50 +192,34 @@ const BUS_DATA = {
       platform: 7,
       routeNum: '1',
       name: '遠州浜蜆塚線',
-      destination: '遠州浜',
+      destination: '遠州浜遠鉄',
       color: '#808080',
-      stops: [
-        { name: '浜松駅', lastBus: '22:10' },
-        { name: '遠州浜', lastBus: '22:50' }
-      ]
+      weekday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:00'
+      },
+      holiday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:00'
+      }
     },
 
-    // === 乗り場8: 鶴見線/掛塚さなる台線 ===
+    // === 乗り場8: 鶴見富塚じゅんかん ===
     {
       id: 'p8-91',
       platform: 8,
       routeNum: '91',
-      name: '鶴見線',
-      destination: '鶴見',
+      name: '鶴見富塚じゅんかん',
+      destination: '新貝住宅',
       color: '#c71585',
-      stops: [
-        { name: '浜松駅', lastBus: '21:55' },
-        { name: '鶴見', lastBus: '22:30' }
-      ]
-    },
-    {
-      id: 'p8-90',
-      platform: 8,
-      routeNum: '90',
-      name: '掛塚さなる台線',
-      destination: '掛塚',
-      color: '#c71585',
-      stops: [
-        { name: '浜松駅', lastBus: '22:25' },
-        { name: '掛塚', lastBus: '23:05' }
-      ]
-    },
-    {
-      id: 'p8-96',
-      platform: 8,
-      routeNum: '96',
-      name: '掛塚さなる台線',
-      destination: '掛塚・豊浜',
-      color: '#c71585',
-      stops: [
-        { name: '浜松駅', lastBus: '21:30' },
-        { name: '豊浜', lastBus: '22:15' }
-      ]
+      weekday: {
+        lastDeparture: '20:55',
+        lastArrival: '21:16'
+      },
+      holiday: {
+        lastDeparture: '20:55',
+        lastArrival: '21:16'
+      }
     },
 
     // === 乗り場9: 中ノ町磐田線 ===
@@ -308,101 +228,35 @@ const BUS_DATA = {
       platform: 9,
       routeNum: '80',
       name: '中ノ町磐田線',
-      destination: '中ノ町・磐田駅・見付',
+      destination: '磐田営業所',
       color: '#ffa500',
-      stops: [
-        { name: '浜松駅', lastBus: '22:00' },
-        { name: '磐田駅', lastBus: '22:50' }
-      ]
+      weekday: {
+        lastDeparture: '22:08',
+        lastArrival: '22:18'
+      },
+      holiday: {
+        lastDeparture: '22:08',
+        lastArrival: '22:18'
+      }
     },
 
-    // === 乗り場10: 笠井線/蒲線/早出線 ===
-    {
-      id: 'p10-73',
-      platform: 10,
-      routeNum: '73',
-      name: '笠井線',
-      destination: '労災・丸塚・原島・笠井',
-      color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '21:50' },
-        { name: '笠井', lastBus: '22:30' }
-      ]
-    },
-    {
-      id: 'p10-75',
-      platform: 10,
-      routeNum: '75',
-      name: '笠井線',
-      destination: '労災・宮竹・原島・笠井',
-      color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '22:20' },
-        { name: '笠井', lastBus: '23:00' }
-      ]
-    },
-    {
-      id: 'p10-76',
-      platform: 10,
-      routeNum: '76',
-      name: '笠井線',
-      destination: '労災正門・宮竹・原島・笠井',
-      color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '21:15' },
-        { name: '笠井', lastBus: '21:55' }
-      ]
-    },
-    {
-      id: 'p10-74',
-      platform: 10,
-      routeNum: '74',
-      name: '蒲線',
-      destination: '労災・丸塚・中田町・イオン市野',
-      color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '22:35' },
-        { name: 'イオン市野', lastBus: '23:15' }
-      ]
-    },
-    {
-      id: 'p10-77',
-      platform: 10,
-      routeNum: '77',
-      name: '蒲線',
-      destination: '労災・丸塚・東海染工・イオン市野',
-      color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '21:05' },
-        { name: 'イオン市野', lastBus: '21:45' }
-      ]
-    },
-    {
-      id: 'p10-78',
-      platform: 10,
-      routeNum: '78',
-      name: '蒲線',
-      destination: '労災・丸塚・原島・産業展示館',
-      color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '21:35' },
-        { name: '産業展示館', lastBus: '22:15' }
-      ]
-    },
+    // === 乗り場10: 早出線 ===
     {
       id: 'p10-2',
       platform: 10,
       routeNum: '2',
       name: '早出線',
-      destination: '遠州病院・柳通り・早出・イオンモール浜松市野',
+      destination: 'イオンモール浜松市野',
       color: '#ff6347',
-      stops: [
-        { name: '浜松駅', lastBus: '21:25' },
-        { name: 'イオンモール浜松市野', lastBus: '22:00' }
-      ]
+      weekday: {
+        lastDeparture: '21:00',
+        lastArrival: '21:16'
+      },
+      holiday: {
+        lastDeparture: '21:00',
+        lastArrival: '21:16'
+      }
     },
-
-    // === 乗り場11: 欠番 ===
 
     // === 乗り場12: 内野台線 ===
     {
@@ -410,12 +264,16 @@ const BUS_DATA = {
       platform: 12,
       routeNum: '61',
       name: '内野台線',
-      destination: '上島・内野台・サンストリート浜北',
+      destination: '内野台車庫',
       color: '#5f9ea0',
-      stops: [
-        { name: '浜松駅', lastBus: '22:25' },
-        { name: 'サンストリート浜北', lastBus: '23:10' }
-      ]
+      weekday: {
+        lastDeparture: '20:53',
+        lastArrival: '20:59'
+      },
+      holiday: {
+        lastDeparture: '20:53',
+        lastArrival: '20:59'
+      }
     },
 
     // === 乗り場13: 山の手医大線/萩丘都田線 ===
@@ -424,174 +282,144 @@ const BUS_DATA = {
       platform: 13,
       routeNum: '50',
       name: '山の手医大線',
-      destination: '市役所・山の手・医大',
+      destination: '医科大学',
       color: '#6495ed',
-      stops: [
-        { name: '浜松駅', lastBus: '22:40' },
-        { name: '医大', lastBus: '23:20' }
-      ]
+      weekday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:10'
+      },
+      holiday: {
+        lastDeparture: '22:40',
+        lastArrival: '23:10'
+      }
     },
     {
-      id: 'p13-53',
+      id: 'p13-53-56',
       platform: 13,
-      routeNum: '53',
+      routeNum: '53/56',
       name: '萩丘都田線',
-      destination: '市役所・萩丘住宅・半田公園・きらりタウン',
+      destination: 'フルーツパーク',
       color: '#6495ed',
-      stops: [
-        { name: '浜松駅', lastBus: '21:55' },
-        { name: 'きらりタウン', lastBus: '22:40' }
-      ]
-    },
-    {
-      id: 'p13-56',
-      platform: 13,
-      routeNum: '56',
-      name: '萩丘都田線',
-      destination: '市役所・萩丘住宅・テクノ・都田・フルーツパーク',
-      color: '#6495ed',
-      stops: [
-        { name: '浜松駅', lastBus: '22:15' },
-        { name: 'フルーツパーク', lastBus: '23:00' }
-      ]
+      weekday: {
+        lastDeparture: '20:45',
+        lastArrival: '21:21'
+      },
+      holiday: {
+        lastDeparture: '20:45',
+        lastArrival: '21:21'
+      }
     },
 
-    // === 乗り場14: 鶴見富塚じゅんかん/泉高丘線/和合西山線（せいれい経由） ===
-    {
-      id: 'p14-8',
-      platform: 14,
-      routeNum: '8',
-      name: '鶴見富塚じゅんかん',
-      destination: 'せいれいまわり',
-      color: '#ba55d3',
-      stops: [
-        { name: '浜松駅', lastBus: '21:45' },
-        { name: 'せいれい', lastBus: '22:20' }
-      ]
-    },
+    // === 乗り場14: 泉高丘線/和合西山線 ===
     {
       id: 'p14-51',
       platform: 14,
       routeNum: '51',
       name: '泉高丘線',
-      destination: 'せいれい病院・泉高丘・姫街道車庫',
+      destination: '姫街道車庫',
       color: '#ba55d3',
-      stops: [
-        { name: '浜松駅', lastBus: '22:05' },
-        { name: '姫街道車庫', lastBus: '22:45' }
-      ]
+      weekday: {
+        lastDeparture: '22:13',
+        lastArrival: '22:49'
+      },
+      holiday: {
+        lastDeparture: '22:13',
+        lastArrival: '22:48'
+      }
     },
     {
-      id: 'p14-58',
+      id: 'p14-48-58',
       platform: 14,
-      routeNum: '58',
+      routeNum: '48/58',
       name: '和合西山線',
-      destination: 'せいれい病院・和合・西山',
+      destination: '西山',
       color: '#ba55d3',
-      stops: [
-        { name: '浜松駅', lastBus: '22:30' },
-        { name: '西山', lastBus: '23:10' }
-      ]
+      weekday: {
+        lastDeparture: '21:02',
+        lastArrival: '21:24'
+      },
+      holiday: {
+        lastDeparture: '21:02',
+        lastArrival: '21:24'
+      }
     },
 
-    // === 乗り場15: 気賀三ヶ日線/引佐線/奥山線/葵町医大線 ===
+    // === 乗り場15: 気賀三ヶ日線/引佐奥山線 ===
     {
       id: 'p15-40',
       platform: 15,
       routeNum: '40',
       name: '気賀三ヶ日線',
-      destination: '姫街道車庫・聖隷三方原病院・気賀・三ヶ日',
+      destination: '三ヶ日車庫',
       color: '#483d8b',
-      stops: [
-        { name: '浜松駅', lastBus: '21:50' },
-        { name: '三ヶ日', lastBus: '22:50' }
-      ]
+      weekday: {
+        lastDeparture: '23:05',
+        lastArrival: '23:54'
+      },
+      holiday: {
+        lastDeparture: '23:05',
+        lastArrival: '23:54'
+      }
     },
     {
-      id: 'p15-43',
+      id: 'p15-43-45',
       platform: 15,
-      routeNum: '43',
-      name: '引佐線',
-      destination: '根洗・聖隷三方原病院・金指・気賀',
+      routeNum: '43/45',
+      name: '引佐奥山線',
+      destination: '奥山',
       color: '#483d8b',
-      stops: [
-        { name: '浜松駅', lastBus: '22:10' },
-        { name: '気賀', lastBus: '23:00' }
-      ]
-    },
-    {
-      id: 'p15-45',
-      platform: 15,
-      routeNum: '45',
-      name: '奥山線',
-      destination: '金指・奥山',
-      color: '#483d8b',
-      stops: [
-        { name: '浜松駅', lastBus: '21:30' },
-        { name: '奥山', lastBus: '22:25' }
-      ]
-    },
-    {
-      id: 'p15-47',
-      platform: 15,
-      routeNum: '47',
-      name: '葵町医大線',
-      destination: '葵町経由・医科大学',
-      color: '#483d8b',
-      stops: [
-        { name: '浜松駅', lastBus: '22:35' },
-        { name: '医科大学', lastBus: '23:15' }
-      ]
+      weekday: {
+        lastDeparture: '22:25',
+        lastArrival: '23:15'
+      },
+      holiday: {
+        lastDeparture: '22:35',
+        lastArrival: '23:25'
+      }
     },
 
-    // === 乗り場16: 高台線/和合西山線（下池川町経由）/都田線 ===
+    // === 乗り場16: 高台線/都田線 ===
     {
       id: 'p16-41',
       platform: 16,
       routeNum: '41',
       name: '高台線',
-      destination: '葵・高丘・ファイブガーデンズ・花川運動公園',
+      destination: '花川運動公園',
       color: '#191970',
-      stops: [
-        { name: '浜松駅', lastBus: '22:20' },
-        { name: '花川運動公園', lastBus: '23:00' }
-      ]
-    },
-    {
-      id: 'p16-48',
-      platform: 16,
-      routeNum: '48',
-      name: '和合西山線',
-      destination: '下池川・和合・西山',
-      color: '#191970',
-      stops: [
-        { name: '浜松駅', lastBus: '21:20' },
-        { name: '西山', lastBus: '22:05' }
-      ]
+      weekday: {
+        lastDeparture: '21:50',
+        lastArrival: '22:35'
+      },
+      holiday: {
+        lastDeparture: '21:50',
+        lastArrival: '22:34'
+      }
     },
     {
       id: 'p16-46',
       platform: 16,
       routeNum: '46',
       name: '都田線',
-      destination: '曳馬野・都田',
+      destination: '都田駅前',
       color: '#191970',
-      stops: [
-        { name: '浜松駅', lastBus: '21:00' },
-        { name: '都田', lastBus: '21:50' }
-      ]
-    },
+      weekday: {
+        lastDeparture: '21:25',
+        lastArrival: '22:17'
+      },
+      holiday: {
+        lastDeparture: '21:25',
+        lastArrival: '22:20'
+      }
+    }
+  ],
+
+  // 掲載対象外の路線（運行本数が極端に少ないなど）
+  excludedRoutes: [
     {
-      id: 'p16-46-te',
-      platform: 16,
-      routeNum: '46-テ',
-      name: '都田線',
-      destination: '曳馬野・テクノ都田',
-      color: '#191970',
-      stops: [
-        { name: '浜松駅', lastBus: '22:50' },
-        { name: 'テクノ都田', lastBus: '23:40' }
-      ]
+      platform: 1,
+      routeNum: '37',
+      name: '大久保線',
+      reason: '終バスが18:07と極端に早い（1日3本のみ運行）'
     }
   ]
 };

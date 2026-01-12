@@ -335,6 +335,35 @@ body {
   width: 100%;
 }
 
+.day-type-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.day-btn {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: var(--font-main);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.day-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.day-btn.active {
+  background: var(--accent-pink);
+  color: var(--text-primary);
+  border-color: var(--accent-pink);
+}
+
 #time-slider {
   width: 100%;
   height: 4px;

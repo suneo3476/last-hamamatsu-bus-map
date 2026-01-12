@@ -26,11 +26,14 @@
   const popupDestination = document.getElementById('popup-destination');
   const popupDepart = document.getElementById('popup-depart');
   const popupArrive = document.getElementById('popup-arrive');
+  const weekdayBtn = document.getElementById('weekday-btn');
+  const holidayBtn = document.getElementById('holiday-btn');
 
   // 状態
   let isPlaying = false;
   let playInterval = null;
   let currentMinutes = 1260; // 21:00 = 21 * 60
+  let isWeekday = true; // 平日/土日祝の切り替え
 
   // ビューポート状態
   let viewBox = { x: -500, y: -500, w: 1000, h: 1000 };
@@ -237,12 +240,25 @@
       const routeColor = route.color || '#00a651';
       const stops = route.stops || [];
 
-      if (stops.length === 0) return;
+      // 新形式（weekday/holiday）の場合は stops チェックをスキップ
+      if (!route.weekday && stops.length === 0) return;
 
-      // 始発駅の発車時刻（浜松駅発）
-      const departMinutes = timeToMinutes(stops[0].lastBus);
-      // 終着駅の到着時刻
-      const arriveMinutes = timeToMinutes(stops[stops.length - 1].lastBus);
+      // 始発駅の発車時刻（浜松駅発）と終着駅の到着時刻
+      // 新形式（weekday/holiday）と旧形式（stops）の両方に対応
+      let departMinutes, arriveMinutes;
+
+      if (route.weekday && route.holiday) {
+        // 新形式: weekday/holiday オブジェクトから取得
+        const schedule = isWeekday ? route.weekday : route.holiday;
+        departMinutes = timeToMinutes(schedule.lastDeparture);
+        arriveMinutes = timeToMinutes(schedule.lastArrival);
+      } else if (stops.length > 0) {
+        // 旧形式: stopsから取得
+        departMinutes = timeToMinutes(stops[0].lastBus);
+        arriveMinutes = timeToMinutes(stops[stops.length - 1].lastBus);
+      } else {
+        return; // データがない場合はスキップ
+      }
 
       // 終了判定（始発時刻が現在時刻を過ぎていたら終了）
       const isExpired = departMinutes < currentMinutes;
@@ -271,8 +287,9 @@
 
       routesGroup.appendChild(line);
 
-      // 始発駅名ラベル（線の始点側）
-      const startStop = stops[0];
+      // 始発駅名ラベル（線の始点側 = 浜松駅）
+      // 新形式では始発は常に「浜松駅」、旧形式では stops[0].name
+      const startStopName = (route.weekday && route.holiday) ? '浜松駅' : (stops[0] ? stops[0].name : '浜松駅');
       const startX = Math.cos(angle) * startRadius;
       const startY = Math.sin(angle) * startRadius;
 
@@ -300,11 +317,12 @@
         startLabel.setAttribute('text-anchor', 'end');
       }
       startLabel.setAttribute('dominant-baseline', 'middle');
-      startLabel.textContent = startStop.name;
+      startLabel.textContent = startStopName;
       stopsGroup.appendChild(startLabel);
 
       // 終着駅のバス停を描画
-      const endStop = stops[stops.length - 1];
+      // 新形式では route.destination、旧形式では stops[stops.length - 1].name
+      const endStopName = (route.weekday && route.holiday) ? route.destination : (stops.length > 0 ? stops[stops.length - 1].name : route.destination);
       const endX = Math.cos(angle) * endRadius;
       const endY = Math.sin(angle) * endRadius;
 
@@ -348,7 +366,7 @@
       }
       label.setAttribute('dominant-baseline', 'middle');
 
-      label.textContent = endStop.name;
+      label.textContent = endStopName;
       stopsGroup.appendChild(label);
     });
   }
@@ -619,6 +637,25 @@
         zoom(1, 0, 0);
       } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
         zoom(-1, 0, 0);
+      }
+    });
+
+    // 平日/土日祝切り替え
+    weekdayBtn.addEventListener('click', () => {
+      if (!isWeekday) {
+        isWeekday = true;
+        weekdayBtn.classList.add('active');
+        holidayBtn.classList.remove('active');
+        drawRoutes();
+      }
+    });
+
+    holidayBtn.addEventListener('click', () => {
+      if (isWeekday) {
+        isWeekday = false;
+        holidayBtn.classList.add('active');
+        weekdayBtn.classList.remove('active');
+        drawRoutes();
       }
     });
   }
