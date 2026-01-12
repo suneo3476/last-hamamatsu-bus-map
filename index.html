@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>浜松終バスマップ - 遠鉄バス終バス可視化</title>
   <meta name="description" content="遠鉄バスの終バスを時間軸で可視化するインタラクティブマップ">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,53 +20,91 @@
     <!-- ヘッダー -->
     <header class="header">
       <h1 class="title">浜松終バスマップ</h1>
-      <p class="subtitle">遠鉄バス終バス可視化</p>
+      <p class="subtitle">HAMAMATSU LAST BUS MAP</p>
     </header>
+
+    <!-- ズームコントロール -->
+    <div class="zoom-controls">
+      <button id="zoom-in" class="zoom-btn">+</button>
+      <button id="zoom-out" class="zoom-btn">−</button>
+    </div>
 
     <!-- メインビジュアライゼーション -->
     <main class="main">
-      <div class="map-container">
-        <svg id="map" viewBox="-400 -400 800 800">
+      <div class="map-container" id="map-container">
+        <svg id="map" viewBox="-500 -500 1000 1000">
           <!-- 同心円（時間軸） -->
           <g id="time-circles"></g>
+          <!-- 現在時刻の円（赤） -->
+          <circle id="current-time-circle" cx="0" cy="0" r="0" class="current-time-circle" />
           <!-- 路線 -->
           <g id="routes"></g>
           <!-- バス停 -->
           <g id="stops"></g>
           <!-- 中心（浜松駅） -->
-          <circle cx="0" cy="0" r="20" class="center-station" />
-          <text x="0" y="5" class="center-label">浜松駅</text>
+          <circle cx="0" cy="0" r="8" class="center-station" />
         </svg>
       </div>
     </main>
 
-    <!-- コントロールパネル -->
-    <div class="controls">
-      <div class="time-display">
-        <span id="current-time">21:00</span>
-      </div>
-      <div class="slider-container">
-        <input type="range" id="time-slider" min="1260" max="1470" value="1260" step="1">
-        <div class="time-labels">
-          <span>21:00</span>
-          <span>22:00</span>
-          <span>23:00</span>
-          <span>24:00</span>
-          <span>24:30</span>
-        </div>
-      </div>
-      <div class="playback-controls">
-        <button id="play-btn" class="btn">▶ 再生</button>
-        <button id="reset-btn" class="btn">↺ リセット</button>
+    <!-- ホバー情報ポップアップ -->
+    <div id="hover-popup" class="hover-popup hidden">
+      <div class="popup-route-name" id="popup-route-name"></div>
+      <div class="popup-destination" id="popup-destination"></div>
+      <div class="popup-times">
+        <span class="popup-depart" id="popup-depart"></span>
+        <span class="popup-arrive" id="popup-arrive"></span>
       </div>
     </div>
 
-    <!-- 情報パネル -->
-    <div id="info-panel" class="info-panel hidden">
-      <button class="close-btn" id="close-panel">×</button>
-      <h2 id="panel-title">バス停名</h2>
-      <div id="panel-content">
-        <!-- 終バス情報が入る -->
+    <!-- コントロールパネル -->
+    <div class="controls">
+      <div class="time-control">
+        <span id="current-time" class="current-time-display">21:00</span>
+        <button id="play-btn" class="play-btn">
+          <span class="play-icon">▶</span>
+        </button>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="time-slider" min="1260" max="1470" value="1260" step="1">
+      </div>
+    </div>
+
+    <!-- 情報ボタン -->
+    <button id="info-btn" class="info-btn">i</button>
+
+    <!-- 情報モーダル -->
+    <div id="info-modal" class="modal hidden">
+      <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <h2 class="modal-title">浜松終バスマップ</h2>
+        <p class="modal-subtitle">HAMAMATSU LAST BUS MAP</p>
+
+        <p class="modal-description">
+          終バスを「時間」で可視化するインタラクティブマップです。
+          同心円は経過時間を表し、時間が進むにつれて乗車可能な
+          路線が消えていきます。
+        </p>
+
+        <h3 class="modal-section-title">使い方</h3>
+        <ul class="modal-list">
+          <li>時間スライダーで時刻を変更</li>
+          <li>路線をタップ/ホバーで詳細表示</li>
+          <li>ドラッグでマップ移動</li>
+          <li>スクロール/ピンチでズーム</li>
+        </ul>
+
+        <h3 class="modal-section-title">データについて</h3>
+        <ul class="modal-list">
+          <li>遠鉄バス公式時刻表を参照</li>
+          <li>平日ダイヤを基にしています</li>
+        </ul>
+
+        <p class="modal-note">
+          ※ダイヤ改正などにより実際と異なる場合がありますので、
+          公式情報をご確認ください。本アプリの利用によるいかなる
+          損害についても責任を負いかねます。
+        </p>
       </div>
     </div>
   </div>

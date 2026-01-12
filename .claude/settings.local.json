@@ -12,7 +12,8 @@
       "Bash(curl:*)",
       "Bash(git merge:*)",
       "WebFetch(domain:last-hamamatsu-bus-map.suneo3476.workers.dev)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "WebFetch(domain:develop-last-hamamatsu-bus-map.suneo3476.workers.dev)"
     ]
   }
 }
