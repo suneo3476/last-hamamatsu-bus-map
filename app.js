@@ -47,11 +47,11 @@
   const MAX_ZOOM = 2000;
   const ZOOM_SENSITIVITY = 0.15; // ズーム感度（小さいほど鈍感）
 
-  // フォントサイズと線の太さのグラデーション設定
-  const FONT_SIZE_MIN = 8;   // 中心側の最小フォントサイズ
-  const FONT_SIZE_MAX = 12;  // 外側の最大フォントサイズ
-  const LINE_WIDTH_MIN = 1.5;  // 中心側の最小線幅
-  const LINE_WIDTH_MAX = 3;  // 外側の最大線幅
+  // フォントサイズと線の太さのグラデーション設定（極端に）
+  const FONT_SIZE_MIN = 6;   // 中心側の最小フォントサイズ
+  const FONT_SIZE_MAX = 14;  // 外側の最大フォントサイズ
+  const LINE_WIDTH_MIN = 1;  // 中心側の最小線幅
+  const LINE_WIDTH_MAX = 4;  // 外側の最大線幅
 
   /**
    * 分を時刻文字列に変換
@@ -95,20 +95,42 @@
   }
 
   /**
+   * 角度から縦書きか横書きかを判定
+   * 真上(0度/360度)±45度と真下(180度)±45度が縦書き
+   * @param {number} angleDeg - 0度が上（y負方向）、時計回りの角度（0-360）
+   * @returns {boolean} 縦書きならtrue
+   */
+  function isVerticalText(angleDeg) {
+    // 真上: 315-360, 0-45 / 真下: 135-225
+    return (angleDeg >= 315 || angleDeg <= 45) || (angleDeg >= 135 && angleDeg <= 225);
+  }
+
+  /**
    * 角度からテキスト回転角度を計算
-   * 線の方向に沿うように回転させる
+   * 縦書きの場合: 縦方向に沿う / 横書きの場合: 横方向に沿う
    * @param {number} angleDeg - 0度が上（y負方向）、時計回りの角度（0-360）
    * @returns {number} テキストの回転角度（度）
    */
   function getTextRotation(angleDeg) {
-    // 線の角度から-90度（上向きの線なら横向きテキスト）を基準に
-    // テキストが読みやすい方向になるよう調整
-    let rotation = angleDeg - 90;
-    // 上下逆さまにならないよう調整（90〜270度の範囲なら180度回転）
-    if (angleDeg > 90 && angleDeg < 270) {
-      rotation = angleDeg + 90;
+    if (isVerticalText(angleDeg)) {
+      // 縦書き: 線の方向に沿って縦に配置
+      // 上向き（315-45度）: -90度で右から左へ読む縦書き
+      // 下向き（135-225度）: 90度で左から右へ読む縦書き
+      if (angleDeg >= 135 && angleDeg <= 225) {
+        return 90; // 下向きは90度
+      } else {
+        return -90; // 上向きは-90度
+      }
+    } else {
+      // 横書き: 線の方向に沿って横に配置
+      // 右側（45-135度）: 線の角度に合わせる
+      // 左側（225-315度）: 180度反転して読みやすく
+      if (angleDeg > 45 && angleDeg < 135) {
+        return angleDeg - 90;
+      } else {
+        return angleDeg + 90;
+      }
     }
-    return rotation;
   }
 
   /**
@@ -130,20 +152,20 @@
       circle.setAttribute('class', 'time-circle');
       timeCirclesGroup.appendChild(circle);
 
-      // ラベル（右下に配置、中心に対して垂直=放射状に回転）
-      const angle = Math.PI / 4; // 45度
-      const labelX = Math.cos(angle) * (radius + 5);
-      const labelY = Math.sin(angle) * (radius + 5);
+      // ラベル（右下に配置、中心からの放射線に対して垂直=円周に沿う向き）
+      const angle = Math.PI / 4; // 45度の位置
+      const labelX = Math.cos(angle) * (radius + 8);
+      const labelY = Math.sin(angle) * (radius + 8);
 
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       label.setAttribute('x', labelX);
       label.setAttribute('y', labelY);
       label.setAttribute('class', 'time-circle-label');
-      // 中心から放射状に回転（45度の位置なので45度回転）
-      const rotationDeg = 45;
+      // 放射線に対して垂直 = 45度位置なら45-90 = -45度回転
+      const rotationDeg = -45;
       label.setAttribute('transform', `rotate(${rotationDeg}, ${labelX}, ${labelY})`);
       label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('dominant-baseline', 'text-before-edge');
+      label.setAttribute('dominant-baseline', 'middle');
       label.textContent = minutesToTime(time);
       timeCirclesGroup.appendChild(label);
     });
@@ -294,36 +316,6 @@
 
       label.textContent = endStop.name;
       stopsGroup.appendChild(label);
-
-      // 路線アイコン（路線の中間あたりに表示）
-      const iconRadius = (startRadius + endRadius) / 2;
-      const iconX = Math.cos(angle) * iconRadius;
-      const iconY = Math.sin(angle) * iconRadius;
-
-      // アイコン背景
-      const iconBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      const iconSize = 18;
-      iconBg.setAttribute('x', iconX - iconSize / 2);
-      iconBg.setAttribute('y', iconY - iconSize / 2);
-      iconBg.setAttribute('width', iconSize);
-      iconBg.setAttribute('height', iconSize);
-      iconBg.setAttribute('rx', 3);
-      iconBg.setAttribute('fill', routeColor);
-      iconBg.setAttribute('class', isExpired ? 'expired' : '');
-
-      stopsGroup.appendChild(iconBg);
-
-      // 路線番号テキスト
-      const routeNum = route.name.split(' ')[0];
-      const iconText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      iconText.setAttribute('x', iconX);
-      iconText.setAttribute('y', iconY);
-      iconText.setAttribute('class', `route-icon ${isExpired ? 'expired' : ''}`);
-      iconText.setAttribute('text-anchor', 'middle');
-      iconText.setAttribute('dominant-baseline', 'middle');
-      iconText.textContent = routeNum;
-
-      stopsGroup.appendChild(iconText);
     });
   }
 
