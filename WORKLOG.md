@@ -76,3 +76,31 @@ https://last-hamamatsu-bus-map.suneo3476.workers.dev
 **次のアクション:**
 - 遠鉄バスの実データを収集して data.js を更新
 - カラーリング調整
+
+---
+
+### 14:30頃 - 開発版/本番版のブランチプレビュー設定完了
+
+**作業内容:**
+- 架空の12路線データを作成（E1, E2, N1, N2, W1, W2, W3, S1, S2, NE1, NW1, M1）
+- 開発版バナー表示機能を追加（meta.isDev フラグで制御）
+- developブランチをpush → Cloudflareが自動でプレビューURL生成
+
+**URL構成:**
+- 本番: https://last-hamamatsu-bus-map.suneo3476.workers.dev (main)
+- 開発: https://develop-last-hamamatsu-bus-map.suneo3476.workers.dev (develop)
+
+**意思決定:**
+- Cloudflareのブランチプレビュー機能を採用
+- 設定不要で自動的にブランチごとのURLが生成される
+- develop → main マージで本番反映というシンプルなワークフロー
+
+**ワークフロー:**
+1. feature/* ブランチで開発
+2. develop にマージ → 開発版URLで確認
+3. main にマージ → 本番反映
+
+**次のアクション:**
+- 遠鉄バスの実データを収集
+- カラーリング調整
+- 細かいUI調整
