@@ -172,32 +172,24 @@ body {
   transition: r 0.3s ease;
 }
 
-.route-line {
+.route-hit-area {
   fill: none;
   stroke-linecap: round;
   cursor: pointer;
+}
+
+.route-hit-area.expired {
+  pointer-events: none;
+}
+
+.route-line {
+  fill: none;
+  stroke-linecap: round;
   transition: opacity 0.3s ease;
 }
 
 .route-line.expired {
   opacity: 0.08;
-  pointer-events: none;
-}
-
-.stop-circle {
-  fill: var(--bg-primary);
-  stroke-width: 2;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.stop-circle:hover {
-  transform: scale(1.3);
-}
-
-.stop-circle.expired {
-  opacity: 0.08;
-  pointer-events: none;
 }
 
 .stop-label {
@@ -212,6 +204,28 @@ body {
 }
 
 .stop-label.expired {
+  opacity: 0.08;
+}
+
+.platform-label {
+  fill: #888888;
+}
+
+.route-icon-bg {
+  transition: opacity 0.3s ease;
+}
+
+.route-icon-bg.expired {
+  opacity: 0.08;
+}
+
+.route-icon-text {
+  font-weight: 700;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.route-icon-text.expired {
   opacity: 0.08;
 }
 

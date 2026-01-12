@@ -44,8 +44,9 @@
   // 定数
   const CENTER_RADIUS = 10;
   const MAX_RADIUS = 420;
-  const TIME_START = 1260; // 21:00
-  const TIME_END = 1470;   // 24:30
+  const TIME_CENTER = 1230; // 20:30（中心時刻）
+  const TIME_START = 1260;  // 21:00（終バス表示開始）
+  const TIME_END = 1470;    // 24:30
   const MIN_ZOOM = 400;
   const MAX_ZOOM = 2000;
   const ZOOM_SENSITIVITY = 0.15; // ズーム感度（小さいほど鈍感）
@@ -55,6 +56,68 @@
   const FONT_SIZE_MAX = 14;  // 外側の最大フォントサイズ
   const LINE_WIDTH_MIN = 1;  // 中心側の最小線幅
   const LINE_WIDTH_MAX = 4;  // 外側の最大線幅
+
+  // 路線カラー（遠鉄バス公式カラーを参考、黒背景用に調整）
+  // 10の位で方面別に色分け
+  const ROUTE_COLORS = {
+    '1': '#ff6b6b',    // 1番台: 赤系
+    '2': '#4ecdc4',    // 2番台: シアン系（イオンモール方面）
+    '4': '#ffd93d',    // 4番台: 黄色（中田島方面）
+    '5': '#95e1d3',    // 5番台: ミント（三島江之島方面）
+    '9': '#a8e6cf',    // 9番台: 緑系（掛塚方面）
+    '12': '#dfe6e9',   // 12番台: 白系（浜名方面）
+    '16': '#74b9ff',   // 16番台: 水色（小沢渡方面）
+    '20': '#81ecec',   // 20番台: シアン（志都呂方面）
+    '30': '#fd79a8',   // 30番台: ピンク（舘山寺方面）
+    '36': '#e17055',   // 36番台: オレンジ（大塚方面）
+    '40': '#00b894',   // 40番台: 緑（気賀三ヶ日方面）
+    '41': '#55efc4',   // 41番台: 明るい緑（高台方面）
+    '43': '#00cec9',   // 43番台: ティール（引佐方面）
+    '46': '#20bf6b',   // 46番台: 緑（都田方面）
+    '48': '#a29bfe',   // 48番台: 薄紫（和合方面）
+    '50': '#6c5ce7',   // 50番台: 紫（山の手医大方面）
+    '51': '#fd79a8',   // 51番台: ピンク（泉高丘方面）
+    '53': '#e056fd',   // 53番台: マゼンタ（萩丘方面）
+    '61': '#ffeaa7',   // 61番台: 黄色（内野台方面）
+    '80': '#fab1a0',   // 80番台: サーモン（磐田方面）
+    '91': '#ff7675',   // 91番台: 赤（鶴見富塚方面）
+  };
+
+  /**
+   * 路線番号からカラーを取得
+   */
+  function getRouteColor(routeNum) {
+    // 路線番号の先頭の数字を取得（例: '30/31' → '30', '16-4' → '16'）
+    const num = routeNum.split(/[\/\-]/)[0];
+
+    // 完全一致で探す
+    if (ROUTE_COLORS[num]) return ROUTE_COLORS[num];
+
+    // 10の位で探す（2桁以上の場合）
+    if (num.length >= 2) {
+      const tens = num.substring(0, num.length - 1) + '0';
+      if (ROUTE_COLORS[tens]) return ROUTE_COLORS[tens];
+    }
+
+    // 1桁の場合はそのまま
+    if (ROUTE_COLORS[num]) return ROUTE_COLORS[num];
+
+    // デフォルト
+    return '#aaaaaa';
+  }
+
+  /**
+   * 色が明るいかどうかを判定（白文字か黒文字かの判断用）
+   */
+  function isLightColor(hexColor) {
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    // 輝度計算
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6;
+  }
 
   /**
    * 分を時刻文字列に変換
@@ -74,10 +137,10 @@
   }
 
   /**
-   * 時刻から半径を計算
+   * 時刻から半径を計算（20:30を中心に）
    */
   function timeToRadius(minutes) {
-    const normalized = Math.max(0, Math.min(1, (minutes - TIME_START) / (TIME_END - TIME_START)));
+    const normalized = Math.max(0, Math.min(1, (minutes - TIME_CENTER) / (TIME_END - TIME_CENTER)));
     return CENTER_RADIUS + (MAX_RADIUS - CENTER_RADIUS) * normalized;
   }
 
@@ -110,28 +173,36 @@
 
   /**
    * 角度からテキスト回転角度を計算
-   * 縦書きの場合: 縦方向に沿う / 横書きの場合: 横方向に沿う
+   * テキストは常に線の方向に沿って配置（縦書きでも線に沿った角度）
    * @param {number} angleDeg - 0度が上（y負方向）、時計回りの角度（0-360）
    * @returns {number} テキストの回転角度（度）
    */
   function getTextRotation(angleDeg) {
+    // テキストは常に線の方向に沿って配置
+    // 上半分（右上から左上）: 読みやすいように調整
+    // 下半分（左下から右下）: 読みやすいように調整
+
     if (isVerticalText(angleDeg)) {
-      // 縦書き: 線の方向に沿って縦に配置
-      // 上向き（315-45度）: -90度で右から左へ読む縦書き
-      // 下向き（135-225度）: 90度で左から右へ読む縦書き
+      // 縦書きエリア: 線の角度に沿う（完全な垂直ではない）
       if (angleDeg >= 135 && angleDeg <= 225) {
-        return 90; // 下向きは90度
+        // 下向き（135-225度）: 線の角度に沿って配置
+        return angleDeg - 180 + 90;
       } else {
-        return -90; // 上向きは-90度
+        // 上向き（315-360, 0-45度）: 線の角度に沿って配置
+        if (angleDeg >= 315) {
+          return angleDeg - 360 - 90;
+        } else {
+          return angleDeg - 90;
+        }
       }
     } else {
-      // 横書き: 線の方向に沿って横に配置
-      // 右側（45-135度）: 線の角度に合わせる
-      // 左側（225-315度）: 180度反転して読みやすく
+      // 横書きエリア: 線の角度に沿う
       if (angleDeg > 45 && angleDeg < 135) {
+        // 右側（45-135度）
         return angleDeg - 90;
       } else {
-        return angleDeg + 90;
+        // 左側（225-315度）
+        return angleDeg - 270;
       }
     }
   }
@@ -237,7 +308,8 @@
       let angleDeg = ((angle + Math.PI / 2) * 180 / Math.PI) % 360;
       if (angleDeg < 0) angleDeg += 360;
 
-      const routeColor = route.color || '#00a651';
+      // 路線カラーを取得（data.jsの色ではなく、路線番号から動的に決定）
+      const routeColor = getRouteColor(route.routeNum || '');
       const stops = route.stops || [];
 
       // 新形式（weekday/holiday）の場合は stops チェックをスキップ
@@ -270,6 +342,25 @@
       // 線の太さ（始点と終点の平均、または終点側を使用）
       const lineWidth = radiusToLineWidth((startRadius + endRadius) / 2);
 
+      // 当たり判定を広げるための透明な太い線（ホバー用）
+      const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      hitArea.setAttribute('x1', Math.cos(angle) * startRadius);
+      hitArea.setAttribute('y1', Math.sin(angle) * startRadius);
+      hitArea.setAttribute('x2', Math.cos(angle) * endRadius);
+      hitArea.setAttribute('y2', Math.sin(angle) * endRadius);
+      hitArea.setAttribute('class', `route-hit-area ${isExpired ? 'expired' : ''}`);
+      hitArea.setAttribute('data-route-id', route.id);
+      hitArea.style.stroke = 'transparent';
+      hitArea.style.strokeWidth = (lineWidth + 16) + 'px'; // 当たり判定を広げる
+
+      // ホバーイベント（当たり判定用）
+      hitArea.addEventListener('mouseenter', (e) => showPopup(e, route, departMinutes, arriveMinutes));
+      hitArea.addEventListener('mousemove', (e) => movePopup(e));
+      hitArea.addEventListener('mouseleave', hidePopup);
+
+      routesGroup.appendChild(hitArea);
+
+      // 実際の線
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', Math.cos(angle) * startRadius);
       line.setAttribute('y1', Math.sin(angle) * startRadius);
@@ -279,17 +370,11 @@
       line.setAttribute('data-route-id', route.id);
       line.style.stroke = routeColor;
       line.style.strokeWidth = lineWidth + 'px';
-
-      // ホバーイベント
-      line.addEventListener('mouseenter', (e) => showPopup(e, route, departMinutes, arriveMinutes));
-      line.addEventListener('mousemove', (e) => movePopup(e));
-      line.addEventListener('mouseleave', hidePopup);
+      line.style.pointerEvents = 'none'; // 実際の線はホバー無効
 
       routesGroup.appendChild(line);
 
-      // 始発駅名ラベル（線の始点側 = 浜松駅）
-      // 新形式では始発は常に「浜松駅」、旧形式では stops[0].name
-      const startStopName = (route.weekday && route.holiday) ? '浜松駅' : (stops[0] ? stops[0].name : '浜松駅');
+      // 乗り場番号ラベル（始発駅の代わり）
       const startX = Math.cos(angle) * startRadius;
       const startY = Math.sin(angle) * startRadius;
 
@@ -297,14 +382,15 @@
       const startLabelX = startX + Math.cos(angle) * startLabelOffset;
       const startLabelY = startY + Math.sin(angle) * startLabelOffset;
 
-      // 始発駅名のフォントサイズ（始点位置に基づく）
+      // 始発のフォントサイズ（始点位置に基づく）
       const startFontSize = radiusToFontSize(startRadius);
 
       const startLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       startLabel.setAttribute('x', startLabelX);
       startLabel.setAttribute('y', startLabelY);
-      startLabel.setAttribute('class', `stop-label start-label ${isExpired ? 'expired' : ''}`);
+      startLabel.setAttribute('class', `stop-label platform-label ${isExpired ? 'expired' : ''}`);
       startLabel.style.fontSize = startFontSize + 'px';
+      startLabel.style.fill = '#888888'; // グレー
 
       // テキストを線の方向に合わせて回転
       const startTextRotation = getTextRotation(angleDeg);
@@ -317,31 +403,16 @@
         startLabel.setAttribute('text-anchor', 'end');
       }
       startLabel.setAttribute('dominant-baseline', 'middle');
-      startLabel.textContent = startStopName;
+      startLabel.textContent = platform + '番';
       stopsGroup.appendChild(startLabel);
 
-      // 終着駅のバス停を描画
-      // 新形式では route.destination、旧形式では stops[stops.length - 1].name
+      // 終着駅のラベル（円は描画しない）
       const endStopName = (route.weekday && route.holiday) ? route.destination : (stops.length > 0 ? stops[stops.length - 1].name : route.destination);
       const endX = Math.cos(angle) * endRadius;
       const endY = Math.sin(angle) * endRadius;
 
-      // バス停の円
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', endX);
-      circle.setAttribute('cy', endY);
-      circle.setAttribute('r', 5);
-      circle.setAttribute('class', `stop-circle ${isExpired ? 'expired' : ''}`);
-      circle.style.stroke = routeColor;
-
-      circle.addEventListener('mouseenter', (e) => showPopup(e, route, departMinutes, arriveMinutes));
-      circle.addEventListener('mousemove', (e) => movePopup(e));
-      circle.addEventListener('mouseleave', hidePopup);
-
-      stopsGroup.appendChild(circle);
-
       // 終着駅名ラベル
-      const labelOffset = 15;
+      const labelOffset = 8;
       const labelX = endX + Math.cos(angle) * labelOffset;
       const labelY = endY + Math.sin(angle) * labelOffset;
 
@@ -368,6 +439,53 @@
 
       label.textContent = endStopName;
       stopsGroup.appendChild(label);
+
+      // 路線番号アイコン（終点駅名の後ろに配置）
+      // テキストの長さを推定してアイコン位置を計算
+      const routeNumText = route.routeNum || '';
+      const iconOffset = endStopName.length * endFontSize * 0.6 + 10; // 駅名の長さ分オフセット
+
+      // アイコンの位置（回転を考慮）
+      const textRotationRad = textRotation * Math.PI / 180;
+      let iconX, iconY;
+
+      if (angleDeg > 90 && angleDeg < 270) {
+        // 左側: text-anchorがendなのでアイコンは始点側
+        iconX = labelX - Math.cos(textRotationRad) * iconOffset;
+        iconY = labelY - Math.sin(textRotationRad) * iconOffset;
+      } else {
+        // 右側: text-anchorがstartなのでアイコンは終点側
+        iconX = labelX + Math.cos(textRotationRad) * iconOffset;
+        iconY = labelY + Math.sin(textRotationRad) * iconOffset;
+      }
+
+      // アイコン背景（角丸四角形）
+      const iconBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const iconWidth = routeNumText.length * endFontSize * 0.5 + 6;
+      const iconHeight = endFontSize + 2;
+      iconBg.setAttribute('x', iconX - iconWidth / 2);
+      iconBg.setAttribute('y', iconY - iconHeight / 2);
+      iconBg.setAttribute('width', iconWidth);
+      iconBg.setAttribute('height', iconHeight);
+      iconBg.setAttribute('rx', 2);
+      iconBg.setAttribute('ry', 2);
+      iconBg.setAttribute('fill', routeColor);
+      iconBg.setAttribute('class', `route-icon-bg ${isExpired ? 'expired' : ''}`);
+      iconBg.setAttribute('transform', `rotate(${textRotation}, ${iconX}, ${iconY})`);
+      stopsGroup.appendChild(iconBg);
+
+      // アイコンテキスト（路線番号）
+      const iconText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      iconText.setAttribute('x', iconX);
+      iconText.setAttribute('y', iconY);
+      iconText.setAttribute('class', `route-icon-text ${isExpired ? 'expired' : ''}`);
+      iconText.style.fontSize = (endFontSize * 0.7) + 'px';
+      iconText.style.fill = isLightColor(routeColor) ? '#000000' : '#ffffff';
+      iconText.setAttribute('text-anchor', 'middle');
+      iconText.setAttribute('dominant-baseline', 'middle');
+      iconText.setAttribute('transform', `rotate(${textRotation}, ${iconX}, ${iconY})`);
+      iconText.textContent = routeNumText;
+      stopsGroup.appendChild(iconText);
     });
   }
 
