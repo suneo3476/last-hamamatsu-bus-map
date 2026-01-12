@@ -201,9 +201,17 @@
       platformGroups[p].push(route);
     });
 
-    // 乗り場数（1-16）
-    const numPlatforms = 16;
+    // 乗り場数（1-16、ただし11は欠番なので実質15）
+    const numPlatforms = 15; // 実際の乗り場数
     const platformAngleStep = (2 * Math.PI) / numPlatforms;
+
+    // 乗り場番号→角度位置のマッピング（11が欠番）
+    // 乗り場1が下から開始、時計回りに配置
+    const platformToPosition = (p) => {
+      if (p <= 10) return p - 1;  // 1-10 → 0-9
+      if (p >= 12) return p - 2;  // 12-16 → 10-14
+      return 0; // 11は使われない
+    };
 
     routes.forEach((route) => {
       const platform = route.platform || 1;
@@ -212,8 +220,8 @@
       const numRoutesInPlatform = platformRoutes.length;
 
       // 乗り場の基本角度（乗り場1が下=180度から開始、時計回り）
-      // 乗り場1→180度、乗り場9→0度（上）、乗り場16→157.5度あたり
-      const platformBaseAngle = Math.PI + (platform - 1) * platformAngleStep;
+      const platformPosition = platformToPosition(platform);
+      const platformBaseAngle = Math.PI + platformPosition * platformAngleStep;
 
       // 同一乗り場内での微調整（乗り場内で均等に分散）
       const offsetAngle = numRoutesInPlatform > 1
