@@ -1,0 +1,5 @@
+name = "last-hamamatsu-bus-map"
+compatibility_date = "2026-01-12"
+
+[assets]
+directory = "./"
